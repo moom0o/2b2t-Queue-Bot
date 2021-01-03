@@ -1,0 +1,16 @@
+{
+  "name": "2b2tqueuebot",
+  "version": "1.0.0",
+  "description": "2b2t queue bot",
+  "main": "index.js",
+  "dependencies": {
+    "minecraft-protocol": "x",
+    "mineflayer": "x",
+    "snekfetch": "x",
+    "socks": "^2.5.1",
+    "socks5-client": "^1.2.8"
+  },
+  "devDependencies": {
+    "proxy-agent": "^4.0.0"
+  }
+}

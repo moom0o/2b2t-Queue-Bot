@@ -1,0 +1,11 @@
+{
+  "ip": "2b2t.org",
+  "port": 25565,
+  "version": "1.12.2",
+  "loginintervalms": 1000,
+
+  "altening": false,
+  "altening_token": "",
+
+  "physics": false
+}
