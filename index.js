@@ -24,7 +24,8 @@ if (config.altening) {
         const lines = data.split(/\r?\n/);
         setInterval(() => {
             if (lines[0]) {
-                run(lines.pop().split(":")[0], lines.pop().split(":")[1])
+                const line = lines.pop()
+                run(line.split(":")[0], line.split(":")[1])
             }
         }, config.loginintervalms)
     });
