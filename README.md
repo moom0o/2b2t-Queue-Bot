@@ -10,7 +10,7 @@ First of all you need two tools:
 
 Install both and then proceed.
 
-Then open git bash in dome folder. Just use the desktop.
+Then open git bash in some folder. Just use the desktop.
 Works best when just right clicking the desktop and clicking open in git bash.
 
 One time setp:
