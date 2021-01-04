@@ -1,11 +1,12 @@
 const snekfetch = require("snekfetch")
 const mineflayer = require("mineflayer")
 const mc = require("minecraft-protocol");
-const Socks = require('socks5-client')
+const socks = require('socks').SocksClient
+const ProxyAgent = require('proxy-agent')
 
 const config = require("./config.json")
 const fs = require("fs");
-const proxyHost = "sex"
+const proxyHost = "69.69.69.69"
 const proxyPort = 1439
 
 if (config.altening) {
@@ -32,52 +33,52 @@ if (config.altening) {
 }
 
 function run(email, password) {
+    let combo = [email, password]
     console.log("STARTING")
-    let bot = mineflayer.createBot({
-        stream: Socks.createConnection({
-            host: config.ip,
-            port: config.port,
-            socksHost: proxyHost,
-            socksPort: proxyPort
-        }),
+    const client = mc.createClient({
+        connect: client => {
+            socks.createConnection({
+                proxy: {
+                    host: proxyHost,
+                    port: parseInt(proxyPort),
+                    type: 5
+                },
+                command: 'connect',
+                destination: {
+                    host: config.ip,
+                    port: config.port
+                }
+            }, (err, info) => {
+                if (err) {
+                    console.log(err)
+                    return
+                }
+
+                client.setSocket(info.socket)
+                client.emit('connect')
+            })
+        },
+        host: config.ip,
+        agent: new ProxyAgent({ protocol: 'socks5:', host: proxyHost, port: proxyPort }),
         username: email,
         password: password,
-        version: config.version,
-        plugins: {
-            conversions: false,
-            furnace: false,
-            math: false,
-            painting: false,
-            scoreboard: false,
-            villager: false,
-            bed: false,
-            book: false,
-            boss_bar: false,
-            chest: false,
-            command_block: false,
-            craft: false,
-            digging: false,
-            dispenser: false,
-            enchantment_table: false,
-            experience: false,
-            rain: false,
-            ray_trace: false,
-            sound: false,
-            tablist: false,
-            time: false,
-            title: false,
-            physics: config.physics,
-            blocks: true
+        version: config.version
+    })
+    client.on('packet', function (packet){
+        if(config.log_packets){
+            console.log(packet)
         }
-    });
-    bot.on('login', () => {
-        setInterval(() => {
-            bot.chat("/queue main")
-        }, 1000)
-        console.log("Logged in " + bot.username)
-    });
-    bot.on('error', err => console.log(err))
-    bot.on('kicked', function (reason) {
-        console.log("I got kicked for", reason, "lol");
-    });
+    })
+    client.on('connect', function () {
+        console.info('connected')
+    })
+    client.on('disconnect', function (packet) {
+        console.log('disconnected: ' + packet.reason)
+    })
+    client.on('end', function () {
+        console.log('Connection lost')
+    })
+    client.on('message', function (packet) {
+        console.log(packet.toString())
+    })
 }
