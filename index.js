@@ -6,14 +6,14 @@ const ProxyAgent = require('proxy-agent')
 
 const config = require("./config.json")
 const fs = require("fs");
-const proxyHost = "69.69.69.69"
-const proxyPort = 1439
+const proxy_list = fs.readFileSync(`./proxies.txt`, 'utf-8')
+let proxies = proxy_list.split(/\r?\n/)
 
 if (config.altening) {
     alts = []
     setInterval(() => {
         snekfetch.get(`http://api.thealtening.com/v1/generate?token=${config.altening_token}&info=true`).then(n => {
-            if(!alts.includes(n.body.token)){
+            if (!alts.includes(n.body.token)) {
                 run(n.body.token, "a")
                 alts.push(n.body.token)
             }
@@ -32,16 +32,22 @@ if (config.altening) {
     });
 }
 
-function run(email, password) {
+function run(email, password, int) {
     let combo = [email, password]
+    if(!proxies[0]){
+        return console.log("Not logging in, out of proxies.")
+    }
+    let proxy = proxies.pop()
+    let proxycombo = proxy.split(":")
+    console.log(proxycombo)
     console.log("STARTING")
     const client = mc.createClient({
         connect: client => {
             socks.createConnection({
                 proxy: {
-                    host: proxyHost,
-                    port: parseInt(proxyPort),
-                    type: 5
+                    host: proxycombo[0],
+                    port: parseInt(proxycombo[1]),
+                    type: config.socks_version
                 },
                 command: 'connect',
                 destination: {
@@ -51,7 +57,6 @@ function run(email, password) {
             }, (err, info) => {
                 if (err) {
                     console.log(err)
-                    return
                 }
 
                 client.setSocket(info.socket)
@@ -59,14 +64,17 @@ function run(email, password) {
             })
         },
         host: config.ip,
-        agent: new ProxyAgent({ protocol: 'socks5:', host: proxyHost, port: proxyPort }),
+        agent: new ProxyAgent({protocol: config.socks_version2 + ":", host: proxycombo[0], port: proxycombo[1]}),
         username: email,
         password: password,
         version: config.version
     })
-    client.on('packet', function (packet){
-        if(config.log_packets){
+    client.on('packet', function (packet) {
+        if (config.log_packets) {
             console.log(packet)
+            if (packet.data) {
+                console.log(packet.data.toString())
+            }
         }
     })
     client.on('connect', function () {
@@ -80,5 +88,25 @@ function run(email, password) {
     })
     client.on('message', function (packet) {
         console.log(packet.toString())
+    })
+    client.on('error', function (error){
+        if(!error.toString().includes("Invalid credentials")){
+            if(int){
+                run(combo[0], combo[1], int)
+            } else {
+                run(combo[0], combo[1], 1)
+            }
+        } else {
+            if(int){
+                if(int < config.maxattemptsperproxy){
+                    run(combo[0], combo[1], int+1)
+                } else {
+                    return console.log("max attempts reached")
+                }
+            } else {
+                run(combo[0], combo[1], int+1)
+            }
+        }
+        console.log(error.toString())
     })
 }

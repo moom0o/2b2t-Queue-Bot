@@ -6,6 +6,9 @@
 
   "altening": false,
   "altening_token": "",
+  "socks_version": 5,
+  "socks_version2": "socks5",
+  "maxattemptsperproxy": 5,
 
   "physics": false,
   "log_packets": false
