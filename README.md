@@ -22,6 +22,6 @@ run:
 
 Then the bot is succefully installed on your pc. And to start it:
 
-`npm start`
+`node index.js`
 
 Thats it!
